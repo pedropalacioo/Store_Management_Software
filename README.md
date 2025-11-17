@@ -316,3 +316,34 @@ STORE_MANAGEMENT_SOFTWARE/
 │  └─ cli.py                
 │
 └─ tests/                    
+```
+
+# 5. Checklist do Projeto — Sistema de Loja Virtual Simplificada
+
+**Semana 1**
+* [X] **UML Textual:** Classes, atributos, métodos e relacionamentos.
+* [X] **README Inicial:** Descrição do projeto e estrutura planejada.
+* [X] **Classes Iniciais:** Arquivos com classes vazias e docstrings.
+
+**Semana 2**
+* [ ] **Classes Base:** Produto, Cliente, Endereco, Carrinho, ItemCarrinho.
+* [ ] **Encapsulamento:** Validações com `@property` e regras de negócio básicas.
+* [ ] **Métodos Especiais:** __len__, __eq__, __repr__.
+* [ ] **Testes Iniciais:** Criação e manipulação básica de objetos.
+
+**Semana 3**
+* [ ] **Herança e Relacionamentos:** Pedido, ItemPedido, Pagamento, Cupom, Frete.
+* [ ] **Fechar Pedido:** Geração de pedido a partir do carrinho.
+* [ ] **Persistência:** JSON ou SQLite + seed inicial.
+* [ ] **Relatório Inicial:** Faturamento por período.
+
+**Semana 4**
+* [ ] **Regras de Negócio:** Estoque, cupons, frete, pagamento, cancelamento.
+* [ ] **Integração:** CLI ou API mínima funcional.
+* [ ] **Testes de Fluxos:** Cenários principais e erros esperados.
+
+**Semana 5**
+* [ ] **Relatórios Finais:** Faturamento, top N, ticket médio, vendas por UF/categoria.
+* [ ] **Documentação Final:** README completo, instruções e diagrama final.
+* [ ] **Qualidade:** Todos os testes passando.
+* [ ] **Entrega:** Criar tag v1.0 no GitHub.
