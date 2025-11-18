@@ -28,6 +28,13 @@ Desenvolver um **sistema simplificado de gerenciamento de loja virtual**, aplica
 | **Frete** | `uf`, `cidade`, `faixa_cep`, `valor`, `prazo_dias` | `calcular_frete()` |
 
 ----
+# 2.1. Diagrama de Classes (UML):
+
+*Representação visual da interação entre classes (simplificada)*
+
+![UML](media/UML%20-%20Pedro%20Yan%20Alcantara%20Palacio.png)
+
+----
 
 ## 3. Estrutura Planejada de Classes:
 Abaixo estão as principais classes do domínio da loja virtual, com seus atributos, métodos e relacionamentos planejados.

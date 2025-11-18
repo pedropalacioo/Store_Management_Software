@@ -1,0 +1,83 @@
+# -------------------------
+# AMBIENTE VIRTUAL
+# -------------------------
+venv/
+.env/
+.venv/
+
+# -------------------------
+# ARQUIVOS PYTHON
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyd
+*.pdb
+
+# Cache de módulos
+*.egg-info/
+.eggs/
+*.egg
+
+# -------------------------
+# EDITORES / IDEs
+# -------------------------
+.vscode/
+.settings/
+.idea/
+
+# -------------------------
+# BANCO DE DADOS / PERSISTÊNCIA
+# -------------------------
+*.sqlite3
+*.db
+*.sqlite
+
+# Arquivos JSON usados como persistência
+# (se quiser versionar, remova)
+data/*.json
+
+# -------------------------
+# TESTES (PyTest)
+# -------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+cache/
+pytestdebug.log
+
+# -------------------------
+# LOGS E ARQUIVOS TEMPORÁRIOS
+# -------------------------
+*.log
+*.tmp
+*.bak
+
+# -------------------------
+# SISTEMAS OPERACIONAIS
+# -------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# -------------------------
+# AMBIENTE DE DOCUMENTAÇÃO
+# -------------------------
+dist/
+build/
+docs/_build/
+
+# -------------------------
+# CONFIGURAÇÕES PRIVADAS
+# -------------------------
+*.env
+.env.*
