@@ -1,146 +1,154 @@
 import uuid
+from .endereco import Endereco
+
 
 class Cliente:
-    def __init__(self, nome: str, email: str, cpf: str, endereco = None):
+    def __init__(self, nome: str, email: str, cpf: str, enderecos=None):
         self.__id = self.gerar__id()
-        self.__nome = nome
-        self.__email = email
-        self.__cpf = cpf
 
-        if endereco is None:
-            self.__endereco = []
+        self.__nome = None
+        self.__email = None
+        self.__cpf = None
+
+        self.nome = nome
+        self.email = email
+        self.cpf = cpf
+
+        # Lista de objetos Endereco (composição)
+        if enderecos is None:
+            self.__enderecos = []
         else:
-            if not isinstance(endereco, list):
-                raise TypeError("Error: endereco must be a list.")
-            if not all(isinstance(item, str) for item in endereco):
-                raise TypeError("Error: Every endereco must be a string.")
-        self.__endereco = endereco
+            if not isinstance(enderecos, list):
+                raise TypeError("Error: enderecos must be a list.")
+            if not all(isinstance(item, Endereco) for item in enderecos):
+                raise TypeError("Error: each item must be an Endereco object.")
+            self.__enderecos = enderecos
 
-    
-    
-    #getter e função: ID
+    # -------------------------------------------------------------------------
+    # ID
+    # -------------------------------------------------------------------------
 
     @property
     def id(self):
         return self.__id
-    
-    def gerar__id(self):
+
+    def gerar__id(self) -> int:
         return uuid.uuid4().int % 10000
-    
-    #getter e setter: NOME
+
+    # -------------------------------------------------------------------------
+    # NOME
+    # -------------------------------------------------------------------------
 
     @property
-    def nome(self):
+    def nome(self) -> str:
         return self.__nome
-    
+
     @nome.setter
-    def nome(self, novo_nome):
+    def nome(self, novo_nome: str) -> None:
         if not isinstance(novo_nome, str):
             raise TypeError("Error: nome must be a string.")
+        if not novo_nome.strip():     # CORREÇÃO AQUI
+            raise ValueError("Error: nome cannot be empty.")
         self.__nome = novo_nome
 
-    #getter e setter: EMAIL
+    # -------------------------------------------------------------------------
+    # EMAIL
+    # -------------------------------------------------------------------------
 
     @property
     def email(self):
         return self.__email
-    
+
     @email.setter
-    def endereco(self, novo_email):
-        if not isinstance(novo_email, str):
-            raise TypeError("Error: email must be a string.")
-        self.__email = novo_email
-
-    #getter e setter: CPF
-    
-    @property
-    def cpf(self):
-        return self.__cpf
-    
-    @cpf.setter
-    def cpf(self, novo_cpf):
-        if not isinstance(novo_cpf, str):
-            raise TypeError("Error: cpf must be a string.")
-        self.__cpf = novo_cpf
-
-    ###########################################################
-
-    def atualizar_nome(self, novo_nome):
-        if not isinstance(novo_nome, str):
-            raise TypeError("Error: nome must be a string.")
-        self.nome = novo_nome
-
-    ###########################################################
-
-    def atualizar_email(self, novo_email):
+    def email(self, novo_email: str) -> None:
         if not isinstance(novo_email, str):
             raise TypeError("Error: email must be a string.")
         if "@" not in novo_email or "." not in novo_email:
             raise ValueError("Error: invalid email.")
-        self.email = novo_email
-    
-    #getter e setter: ENDERECO
+        self.__email = novo_email
+
+    # -------------------------------------------------------------------------
+    # CPF
+    # -------------------------------------------------------------------------
+
     @property
-    def endereco(self):
-        return self.__endereco
-    
-    @endereco.setter
-    def endereco(self, novo_endereco):
-        if not isinstance(novo_endereco, list):
-            raise TypeError("Error: endereco must be a list.")
-        if not all(isinstance(item, str) for item in novo_endereco):
-            raise TypeError("Error: every endereco must be a string.")
-        self.__endereco = novo_endereco
+    def cpf(self):
+        return self.__cpf
 
-    ###########################################################
+    @cpf.setter
+    def cpf(self, novo_cpf: str) -> None:
+        if not isinstance(novo_cpf, str):
+            raise TypeError("Error: cpf must be a string.")
+        if len(novo_cpf) != 11:
+            raise ValueError("Error: cpf must have 11 digits.")
+        if not novo_cpf.isdigit():
+            raise ValueError("Error: cpf must contain only digits.")
+        self.__cpf = novo_cpf
 
-    def adicionar_endereco(self, endereco):
-        if not isinstance(endereco, str):
-            raise TypeError("Error: endereco must be a string.")
-        self.endereco.append(endereco)
+    # -------------------------------------------------------------------------
+    # ENDEREÇOS
+    # -------------------------------------------------------------------------
 
-    def remover_endereco(self, endereco):
-        if not isinstance(endereco, str):
-            raise TypeError("Error: endereco must be a string.")
-        if endereco not in self.endereco:
+    @property
+    def enderecos(self) -> list[Endereco]:
+        return self.__enderecos
+
+    @enderecos.setter
+    def enderecos(self, nova_lista: list[Endereco]):
+        if not isinstance(nova_lista, list):
+            raise TypeError("Error: enderecos must be a list.")
+        if not all(isinstance(item, Endereco) for item in nova_lista):
+            raise TypeError("Error: each item must be an Endereco object.")
+        self.__enderecos = nova_lista
+
+    # -------------------------------------------------------------------------
+    # MANIPULAÇÃO DE ENDEREÇOS
+    # -------------------------------------------------------------------------
+
+    def adicionar_endereco(self, endereco: Endereco) -> None:
+        if not isinstance(endereco, Endereco):
+            raise TypeError("Error: endereco must be an Endereco object.")
+        self.__enderecos.append(endereco)     # CORREÇÃO
+
+    def remover_endereco(self, endereco: Endereco) -> None:
+        if not isinstance(endereco, Endereco):
+            raise TypeError("Error: endereco must be an Endereco object.")
+        if endereco not in self.__enderecos:
             raise ValueError("Error: endereco not found in the list.")
-        
-        self.endereco.remove(endereco)
+        self.__enderecos.remove(endereco)
 
-    
-    ###########################################################
-    # Remover endereço por índice (pode ser usado no futuro!) 
-    ###########################################################
-
-    def remover_endereco_indice(self, indice):
+    def remover_endereco_indice(self, indice: int) -> None:
         if not isinstance(indice, int):
-            raise TypeError("Error: indice must be an intenger.")
-        if indice < 0 or indice >= len(self.endereco):
+            raise TypeError("Error: indice must be an integer.")
+        if indice < 0 or indice >= len(self.__enderecos):
             raise ValueError("Error: indice out of list interval.")
-        
-        self.endereco.pop(indice)
+        self.__enderecos.pop(indice)
 
-    # Métodos Especiais:
+    # -------------------------------------------------------------------------
+    # MÉTODOS ESPECIAIS
+    # -------------------------------------------------------------------------
 
-    def __eq__(self, outro):
+    def __eq__(self, outro) -> bool:
+        from .cliente import Cliente        # CORREÇÃO
+
         if not isinstance(outro, Cliente):
-            raise TypeError("Error: Invalid comparison between other objects.")
-        self.cpf = outro.cpf
+            return NotImplemented
+        return self.cpf == outro.cpf or self.email == outro.email
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
-            f"Cliente ID: {self.id}"
-            f"Nome: {self.nome}"
-            f"Email: {self.email}"
-            f"CPF: {self.cpf}"
-            f"Endereços: {len(self.endereco)}"
+            f"Cliente ID: {self.id} | "
+            f"Nome: {self.nome} | "
+            f"Email: {self.email} | "
+            f"CPF: {self.cpf} | "
+            f"Endereços cadastrados: {len(self.__enderecos)}"
         )
-    
-    def __repr__(self):
+
+    def __repr__(self) -> str:
         return (
-            f"Cliente(id = {self.id}, nome = {self.nome}, "
-            f"email: {self.email}, cpf = {self.cpf}"
-            f"endereco = {len(self.endereco)})"
+            f"Cliente(id={self.id}, nome='{self.nome}', "
+            f"email='{self.email}', cpf='{self.cpf}', "
+            f"enderecos={len(self.__enderecos)})"
         )
 
     """
@@ -149,7 +157,7 @@ class Cliente:
     - remover_endereco() FEITO!
     - atualizar_email() FEITO!
     - atualizar_nome() FEITO!
-    - __eq__ () --> cpf selecionado para verificação de igualdade. FEITO!
+    - __eq__ () --> cpf e email selecionados para verificação de igualdade. FEITO!
     - __str__ () FEITO!
     Extras:
     -__repr__() FEITO!
