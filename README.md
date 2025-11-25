@@ -304,25 +304,25 @@ STORE_MANAGEMENT_SOFTWARE/
 ├─ settings.json            
 ├─ requirements.txt          
 │
-├─ loja/                     
-│  ├─ __init__.py
-│  │
-│  ├─ models/                
-│  │  ├─ __init__.py
-│  │  ├─ produto.py
-│  │  ├─ cliente.py
-│  │  ├─ endereco.py
-│  │  ├─ carrinho.py
-│  │  ├─ pedido.py
-│  │  ├─ pagamento.py
-│  │  ├─ cupom.py
-│  │  └─ frete.py
-│  │
-│  ├─ storage.py            
-│  ├─ services.py            
-│  └─ cli.py                
-│
-└─ tests/                    
+└─ loja/                     
+   ├─ __init__.py
+   │
+   ├─ src/                
+   │  ├─ __init__.py
+   │  ├─ produto.py
+   │  ├─ cliente.py
+   │  ├─ endereco.py
+   │  ├─ carrinho.py
+   │  ├─ pedido.py
+   │  ├─ pagamento.py
+   │  ├─ cupom.py
+   │  └─ frete.py
+   ├─ test/
+   │  ├─ __init__.py
+   │  └─ test_cliente.py
+   ├─ storage.py            
+   ├─ services.py            
+   └─ cli.py                                    
 ```
 
 # 5. Checklist do Projeto — Sistema de Loja Virtual Simplificada
@@ -333,10 +333,13 @@ STORE_MANAGEMENT_SOFTWARE/
 * [X] **Classes Iniciais:** Arquivos com classes vazias e docstrings.
 
 **Semana 2**
-* [ ] **Classes Base:** Produto, Cliente, Endereco, Carrinho, ItemCarrinho.
-* [ ] **Encapsulamento:** Validações com `@property` e regras de negócio básicas.
-* [ ] **Métodos Especiais:** __len__, __eq__, __repr__.
-* [ ] **Testes Iniciais:** Criação e manipulação básica de objetos.
+* [x] **Classes Base:** Produto, Cliente, Endereco, Carrinho, ItemCarrinho.
+* [x] **Encapsulamento:** Validações com `@property` e regras de negócio básicas.
+* [x] **Métodos Especiais:** __len__, __eq__, __repr__.
+* **Testes Iniciais(Com pytest):** 
+* [X] **Test_cliente.py**
+* [ ] **test_endereco.py**  
+* [ ] **test_carrinho.py**
 
 **Semana 3**
 * [ ] **Herança e Relacionamentos:** Pedido, ItemPedido, Pagamento, Cupom, Frete.
