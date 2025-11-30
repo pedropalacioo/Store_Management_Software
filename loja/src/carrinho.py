@@ -1,5 +1,5 @@
 import uuid
-from item_carrinho import ItemCarrinho
+from .item_carrinho import ItemCarrinho
 
 class Carrinho:
     def __init__(self, cliente, criado_em=None, atualizado_em=None, ativo=True):
@@ -113,7 +113,7 @@ class Carrinho:
         self.__itens.clear()
 
     def __len__(self):
-        return (f"Qtd de itens na lista: {len(self.itens)}")
+        return sum(item.quantidade for item in self.__itens)
 
     def __str__(self):
         return (

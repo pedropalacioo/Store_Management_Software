@@ -32,6 +32,8 @@ class Endereco:
             raise TypeError("Error: cep must be a string.")
         if len(novo_cep) != 8:
             raise ValueError("Error: cep must have 8 digits.")
+        if not novo_cep.isdigit():
+            raise ValueError("Error: cep must have just numbers.")
         self.__cep = novo_cep
         
 ############################CIDADE##############################
@@ -70,6 +72,7 @@ class Endereco:
     def logradouro(self, novo_logradouro):
         if not isinstance(novo_logradouro, str):
             raise TypeError("Error: logradouro must be a string.")
+        self.__logradouro = novo_logradouro
         
 ########################NUMERO##################################
 
@@ -107,7 +110,7 @@ class Endereco:
             f"CEP: {self.cep},"
             f"Cidade: {self.cidade}, UF: {self.uf},"
             f"Logradouro: {self.logradouro}, Nº: {self.numero}"
-            f"{self.complemento}."
+            f"{complemento_str}."
         )
 
 

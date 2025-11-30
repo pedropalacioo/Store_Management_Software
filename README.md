@@ -337,8 +337,8 @@ STORE_MANAGEMENT_SOFTWARE/
 * [x] **Encapsulamento:** Validações com `@property` e regras de negócio básicas.
 * [x] **Métodos Especiais:** __len__, __eq__, __repr__.
 * **Testes Iniciais(Com pytest):** 
-* [X] **Test_cliente.py**
-* [ ] **test_endereco.py**  
+* [X] **test_cliente.py**
+* [X] **test_endereco.py**  
 * [ ] **test_carrinho.py**
 
 **Semana 3**
