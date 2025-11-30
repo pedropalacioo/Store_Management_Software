@@ -339,7 +339,7 @@ STORE_MANAGEMENT_SOFTWARE/
 * **Testes Iniciais(Com pytest):** 
 * [X] **test_cliente.py**
 * [X] **test_endereco.py**  
-* [ ] **test_carrinho.py**
+* [X] **test_carrinho.py**
 
 **Semana 3**
 * [ ] **Herança e Relacionamentos:** Pedido, ItemPedido, Pagamento, Cupom, Frete.
