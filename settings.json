@@ -1,0 +1,47 @@
+{
+  "frete": {
+    "uf_origem": "CE",
+    "tabela_por_uf": {
+      "AC": { "valor": 32.0, "prazo": 12 },
+      "AL": { "valor": 18.0, "prazo": 5 },
+      "AP": { "valor": 32.0, "prazo": 12 },
+      "AM": { "valor": 35.0, "prazo": 14 },
+      "BA": { "valor": 20.0, "prazo": 6 },
+      "CE": { "valor": 10.0, "prazo": 3 },
+      "DF": { "valor": 27.0, "prazo": 7 },
+      "ES": { "valor": 25.0, "prazo": 7 },
+      "GO": { "valor": 26.0, "prazo": 7 },
+      "MA": { "valor": 22.0, "prazo": 6 },
+      "MT": { "valor": 30.0, "prazo": 10 },
+      "MS": { "valor": 30.0, "prazo": 10 },
+      "MG": { "valor": 25.0, "prazo": 7 },
+      "PA": { "valor": 30.0, "prazo": 12 },
+      "PB": { "valor": 15.0, "prazo": 4 },
+      "PR": { "valor": 28.0, "prazo": 8 },
+      "PE": { "valor": 18.0, "prazo": 5 },
+      "PI": { "valor": 15.0, "prazo": 4 },
+      "RJ": { "valor": 25.0, "prazo": 7 },
+      "RN": { "valor": 15.0, "prazo": 4 },
+      "RS": { "valor": 30.0, "prazo": 9 },
+      "RO": { "valor": 34.0, "prazo": 13 },
+      "RR": { "valor": 34.0, "prazo": 13 },
+      "SC": { "valor": 28.0, "prazo": 8 },
+      "SP": { "valor": 25.0, "prazo": 7 },
+      "SE": { "valor": 18.0, "prazo": 5 },
+      "TO": { "valor": 26.0, "prazo": 8 }
+    },
+    "default": {
+      "valor": 30.0,
+      "prazo": 10
+    }
+  },
+
+  "cupons": {
+    "validade_padrao_dias": 30,
+    "uso_maximo_padrao": 100
+  },
+
+  "relatorios": {
+    "top_n_produtos": 5
+  }
+}

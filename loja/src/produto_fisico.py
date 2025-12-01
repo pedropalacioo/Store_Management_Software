@@ -1,58 +1,95 @@
 from produto import Produto
 
-"Subclasse de Produto!"
 
-class produto_fisico(Produto):
-    def __init__(self, nome: str, categoria: str, preco: float, estoque: int, ativo: bool, peso: float, altura: float, largura: float, profundidade: float):
-        super().__init__(nome, categoria, preco, estoque, ativo, peso, altura, largura, profundidade)
+class ProdutoFisico(Produto):
+    """Subclasse de Produto para itens físicos (consideram peso/medidas)."""
 
-        self.__peso = peso
-        self.__altura = altura
-        self.__largura = largura
-        self.__profundidade = profundidade
+    def __init__(self, nome: str, categoria: str, preco: float, estoque: int, ativo: bool, peso: float, altura: float, largura: float, profundidade: float,):
+        super().__init__(nome, categoria, preco, estoque, ativo)
+        self.peso = peso
+        self.altura = altura
+        self.largura = largura
+        self.profundidade = profundidade
 
-# getters e setters:
+    # PESO
 
     @property
-    def peso(self):
+    def peso(self) -> float:
         return self.__peso
-    
+
     @peso.setter
-    def peso(self, novo_peso):
-        if not isinstance(novo_peso, float):
-            raise TypeError("Error: peso msut be a float value.")
-        self.__peso = novo_peso
+    def peso(self, novo_peso: float) -> None:
+        if not isinstance(novo_peso, (int, float)):
+            raise TypeError("Error: peso must be a number.")
+        if novo_peso <= 0:
+            raise ValueError("Error: peso must be greater than zero.")
+        self.__peso = float(novo_peso)
+
+    # ALTURA
 
     @property
-    def altura(self):
+    def altura(self) -> float:
         return self.__altura
-    
+
     @altura.setter
-    def altura(self, nova_altura):
-        if not isinstance(nova_altura, float):
-            raise TypeError("Error: altura must be a float value.")
-        self.__altura = nova_altura
+    def altura(self, nova_altura: float) -> None:
+        if not isinstance(nova_altura, (int, float)):
+            raise TypeError("Error: altura must be a number.")
+        if nova_altura <= 0:
+            raise ValueError("Error: altura must be greater than zero.")
+        self.__altura = float(nova_altura)
+
+    # LARGURA
 
     @property
-    def largura(self):
+    def largura(self) -> float:
         return self.__largura
-    
+
     @largura.setter
-    def largura(self, nova_largura):
-        if not isinstance(nova_largura, float):
-            raise TypeError("Error: largura must be a float value.")
-        self.__largura = nova_largura
+    def largura(self, nova_largura: float) -> None:
+        if not isinstance(nova_largura, (int, float)):
+            raise TypeError("Error: largura must be a number.")
+        if nova_largura <= 0:
+            raise ValueError("Error: largura must be greater than zero.")
+        self.__largura = float(nova_largura)
+
+    # PROFUNDIDADE
 
     @property
-    def profundidade(self):
+    def profundidade(self) -> float:
         return self.__profundidade
-    
+
     @profundidade.setter
-    def profundidade(self, nova_profundidade):
-        if not isinstance(nova_profundidade, float):
-            raise TypeError("Error: profundidade must be a float value.")
-        self.__profundidade = nova_profundidade
+    def profundidade(self, nova_profundidade: float) -> None:
+        if not isinstance(nova_profundidade, (int, float)):
+            raise TypeError("Error: profundidade must be a number.")
+        if nova_profundidade <= 0:
+            raise ValueError("Error: profundidade must be greater than zero.")
+        self.__profundidade = float(nova_profundidade)
+
+    # MÉTODO EXTRA: CUBAGEM
+
+    def calcular_cubagem(self) -> float:
+        return self.altura * self.largura * self.profundidade
+
+    def __str__(self) -> str:
+        base = super().__str__()
+        return (
+            f"{base} | Tipo: FISICO | "
+            f"Peso: {self.peso} | "
+            f"Dimensões (A x L x P): {self.altura} x {self.largura} x {self.profundidade}"
+        )
+
+    def __repr__(self) -> str:
+        return (
+            f"ProdutoFisico(sku={self.sku!r}, nome={self.nome!r}, "
+            f"categoria={self.categoria!r}, preco={self.preco!r}, "
+            f"estoque={self.estoque!r}, ativo={self.ativo!r}, "
+            f"peso={self.peso!r}, altura={self.altura!r}, "
+            f"largura={self.largura!r}, profundidade={self.profundidade!r})"
+        )
 
 #Métodos:
-#reescrever __str__() e __repr__()
-#def calcular_cubagem()
+# __str__() FEITO!
+# __repr__() FEITO!
+#def calcular_cubagem() FEITO!
