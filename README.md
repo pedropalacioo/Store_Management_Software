@@ -342,8 +342,8 @@ STORE_MANAGEMENT_SOFTWARE/
 * [X] **test_carrinho.py**
 
 **Semana 3**
-* [ ] **Herança e Relacionamentos:** Pedido, ItemPedido, Pagamento, Cupom, Frete.
-* [ ] **Fechar Pedido:** Geração de pedido a partir do carrinho.
+* [X] **Herança e Relacionamentos:** Pedido, ItemPedido, Pagamento, Cupom, Frete.
+* [X] **Fechar Pedido:** Geração de pedido a partir do carrinho.
 * [ ] **Persistência:** JSON ou SQLite + seed inicial.
 * [ ] **Relatório Inicial:** Faturamento por período.
 
