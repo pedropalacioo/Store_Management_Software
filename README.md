@@ -344,8 +344,8 @@ STORE_MANAGEMENT_SOFTWARE/
 **Semana 3**
 * [X] **Herança e Relacionamentos:** Pedido, ItemPedido, Pagamento, Cupom, Frete.
 * [X] **Fechar Pedido:** Geração de pedido a partir do carrinho.
-* [ ] **Persistência:** JSON ou SQLite + seed inicial.
-* [ ] **Relatório Inicial:** Faturamento por período.
+* [X] **Persistência:** JSON ou SQLite + seed inicial.
+* [X] **Relatório Inicial:** Faturamento por período.
 
 **Semana 4**
 * [ ] **Regras de Negócio:** Estoque, cupons, frete, pagamento, cancelamento.
