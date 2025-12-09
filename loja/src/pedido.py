@@ -390,12 +390,15 @@ class Pedido:
         data_pagamento: Optional[datetime] = None,
     ) -> None:
         if not isinstance(valor_pago, (int, float)):
-            raise TypeError("Error: valor_pago must be a number.")
+            raise TypeError("Error: 'valor_pago' must be a number.")
 
         if valor_pago < self.__total:
             raise ValueError(
                 "Error: valor_pago must be >= total do pedido."
             )
+
+        #regra de negócio do estoque!
+        self._baixar_estoque()
 
         self.__pago_em = data_pagamento or datetime.now()
         self.status = self.STATUS_PAGO
@@ -407,6 +410,9 @@ class Pedido:
             raise ValueError(
                 "Error: pedido só pode ser cancelado se estiver CRIADO ou PAGO."
             )
+
+        if self.__status == self.STATUS_PAGO:
+            self._estornar_estoque()
 
         self.status = self.STATUS_CANCELADO
         self.__cancelado_em = datetime.now()
@@ -471,6 +477,38 @@ class Pedido:
             f"Pedido(id={self.__id}, cliente={self.__cliente!r}, "
             f"total={self.__total:.2f}, status='{self.__status}')"
         )
+    
+    # REGRA DE NEGÓCIO - CONTROLE DE ESTOQUE
+
+    def _baixar_estoque(self):
+        # Diminui estoque do produto com base no pedido, não permitindo estoque negativo.
+        for item in self.__itens:
+            produto = item.produto
+            quantidade = item.quantidade
+
+            # validação de atributo estoque:
+            estoque_atual = getattr(produto, "estoque", None)
+            if estoque_atual is None:
+                raise AttributeError("'Produto' doesn't have 'estoque' attribute.")
+            
+            if quantidade > estoque_atual:
+                raise ValueError(
+                    f"Estoque insuficiente para o produto {produto.nome}: "
+                    f"solicitado {quantidade}, disponível {estoque_atual}."                    
+                )
+            
+        for item in self.__itens:
+            produto = item.produto
+            produto.estoque = produto.estoque - item.quantidade
+
+    def _estornar_estoque(self):
+        # Reverte a baixa de estoque (usado em cancelamento do pedido pago).
+        for item in self.__itens:
+            produto = item.produto
+            estoque_atual = getattr(produto, "estoque", None)
+            if estoque_atual is None:
+                raise AttributeError("'Produto' doesn't have 'estoque' attribute.")
+            produto.estoque = estoque_atual + item.quantidade
 
 """
     Métodos planejados:

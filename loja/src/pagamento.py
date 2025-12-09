@@ -74,9 +74,16 @@ class Pagamento:
         e efetua baixa de estoque.
         """
         if self.__confirmado:
-            return  # já confirmado
+            return # já confirmado
 
         self.validar_valor()
+
+    
+        #REGRA DE NEGÓCIO
+        self.__pedido.registrar_pagamento(
+            valor_pago=self.__valor,
+            data_pagamento=self.__data_pagamento
+        )
 
         # marca pagamento como confirmado
         self.__confirmado = True
