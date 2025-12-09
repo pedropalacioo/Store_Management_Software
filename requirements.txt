@@ -1,3 +1,4 @@
 "
 Requirements of the virtual enviroment.
 "
+typer==0.20.0
