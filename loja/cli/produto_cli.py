@@ -2,7 +2,7 @@
 import typer
 from typing import Optional
 
-from loja import services  # ajuste se seu services estiver em outro lugar
+from loja.services import services  # ajuste se seu services estiver em outro lugar
 
 app = typer.Typer(help="Comandos relacionados a produtos.")
 

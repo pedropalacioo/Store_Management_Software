@@ -1,9 +1,11 @@
 """
 Regras de negócio / Persistência de dados da aplicação.
 """
+
+
 from __future__ import annotations
 from typing import Optional, List
-from collections import Dict, Any
+from typing import Dict, Any
 from datetime import datetime
 from collections import Counter
 

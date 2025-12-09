@@ -1,4 +1,5 @@
 "
 Requirements of the virtual enviroment.
 "
+pytest
 typer==0.20.0
