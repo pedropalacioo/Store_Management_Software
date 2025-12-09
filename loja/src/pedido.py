@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from cliente import Cliente
 from carrinho import Carrinho
@@ -10,13 +10,19 @@ from item_pedido import ItemPedido
 from cupom import Cupom
 from frete import Frete
 
+# Import só para o type checker (não roda em tempo de execução)
+if TYPE_CHECKING:
+    from pagamento import Pagamento
+
+
 class Pedido:
     STATUS_CRIADO = "CRIADO"
+    STATUS_PENDENTE_PAGAMENTO = "PENDENTE_PAGAMENTO"
+    STATUS_PAGO_PARCIAL = "PAGO_PARCIAL"
     STATUS_PAGO = "PAGO"
     STATUS_ENVIADO = "ENVIADO"
     STATUS_ENTREGUE = "ENTREGUE"
     STATUS_CANCELADO = "CANCELADO"
-
 
     def __init__(
         self,
@@ -31,7 +37,7 @@ class Pedido:
         # ID
         self.__id = self._gerar_id()
 
-                # Atributos principais
+        # Atributos principais
         self.__cliente: Cliente = None  # type: ignore
         self.__itens: List[ItemPedido] = []
         self.__frete: Optional[Frete] = None
@@ -41,6 +47,10 @@ class Pedido:
         self.__descontos: float = 0.0
         self.__valor_frete: float = 0.0
         self.__total: float = 0.0
+
+        # Pagamentos
+        self.__pagamentos: List[Pagamento] = []  # reconhecido pelo Pylance via TYPE_CHECKING
+        self.__total_pago: float = 0.0
 
         self.__status: str = self.STATUS_CRIADO
         self.__endereco_entrega = None
@@ -67,7 +77,7 @@ class Pedido:
         self._atualizar_valor_frete()
         self.calcular_total()
 
-    # ID
+    # ===================== ID =====================
 
     @property
     def id(self) -> int:
@@ -76,7 +86,7 @@ class Pedido:
     def _gerar_id(self) -> int:
         return uuid.uuid4().int % 10000
 
-    # CLIENTE
+    # ===================== CLIENTE =====================
 
     @property
     def cliente(self) -> Cliente:
@@ -88,7 +98,7 @@ class Pedido:
             raise TypeError("Error: cliente must be a Cliente object.")
         self.__cliente = novo_cliente
 
-    # ITENS
+    # ===================== ITENS =====================
 
     @property
     def itens(self) -> List[ItemPedido]:
@@ -104,7 +114,7 @@ class Pedido:
             raise TypeError("Error: itens must contain only ItemPedido objects.")
         self.__itens = novos_itens
 
-    # FRETE
+    # ===================== FRETE =====================
 
     @property
     def frete(self) -> Optional[Frete]:
@@ -121,10 +131,9 @@ class Pedido:
         if self.__frete is None:
             self.__valor_frete = 0.0
         else:
-            # Assumindo que Frete tenha um atributo `valor`
             self.__valor_frete = float(getattr(self.__frete, "valor", 0.0))
 
-    # CUPOM
+    # ===================== CUPOM =====================
 
     @property
     def cupom(self) -> Optional[Cupom]:
@@ -136,7 +145,7 @@ class Pedido:
             raise TypeError("Error: cupom must be a Cupom object or None.")
         self.__cupom = novo_cupom
 
-    # SUBTOTAL
+    # ===================== SUBTOTAL =====================
 
     @property
     def subtotal(self) -> float:
@@ -150,7 +159,7 @@ class Pedido:
             raise ValueError("Error: subtotal must be >= 0.")
         self.__subtotal = float(novo_subtotal)
 
-    # DESCONTOS
+    # ===================== DESCONTOS =====================
 
     @property
     def descontos(self) -> float:
@@ -164,7 +173,7 @@ class Pedido:
             raise ValueError("Error: descontos must be >= 0.")
         self.__descontos = float(novo_desconto)
 
-    # VALOR FRETE
+    # ===================== VALOR FRETE =====================
 
     @property
     def valor_frete(self) -> float:
@@ -178,7 +187,7 @@ class Pedido:
             raise ValueError("Error: valor_frete must be >= 0.")
         self.__valor_frete = float(valor)
 
-    # TOTAL
+    # ===================== TOTAL =====================
 
     @property
     def total(self) -> float:
@@ -192,7 +201,7 @@ class Pedido:
             raise ValueError("Error: total must be >= 0.")
         self.__total = float(novo_total)
 
-    # STATUS
+    # ===================== STATUS =====================
 
     @property
     def status(self) -> str:
@@ -202,6 +211,8 @@ class Pedido:
     def status(self, novo_status: str) -> None:
         estados_validos = {
             self.STATUS_CRIADO,
+            self.STATUS_PENDENTE_PAGAMENTO,
+            self.STATUS_PAGO_PARCIAL,
             self.STATUS_PAGO,
             self.STATUS_ENVIADO,
             self.STATUS_ENTREGUE,
@@ -211,7 +222,7 @@ class Pedido:
             raise ValueError(f"Error: status must be one of {estados_validos}.")
         self.__status = novo_status
 
-    # ENDEREÇO ENTREGA
+    # ===================== ENDEREÇO ENTREGA =====================
 
     @property
     def endereco_entrega(self):
@@ -219,10 +230,9 @@ class Pedido:
 
     @endereco_entrega.setter
     def endereco_entrega(self, endereco) -> None:
-        # Aqui você pode validar se é um Endereco, string formatada, etc.
         self.__endereco_entrega = endereco
 
-    # DATAS
+    # ===================== DATAS =====================
 
     @property
     def criado_em(self) -> datetime:
@@ -268,7 +278,7 @@ class Pedido:
             raise TypeError("Error: cancelado_em must be a datetime or None.")
         self.__cancelado_em = data
 
-    # CÓDIGO RASTREIO
+    # ===================== CÓDIGO RASTREIO =====================
 
     @property
     def codigo_rastreio(self) -> Optional[str]:
@@ -283,7 +293,22 @@ class Pedido:
     def _gerar_codigo_rastreio(self) -> str:
         return uuid.uuid4().hex[:12].upper()
 
-    # MÉTODOS PLANEJADOS
+    # ===================== PAGAMENTOS =====================
+
+    @property
+    def pagamentos(self) -> List[Pagamento]:
+        return list(self.__pagamentos)
+
+    @property
+    def total_pago(self) -> float:
+        return float(self.__total_pago)
+
+    @property
+    def valor_em_aberto(self) -> float:
+        aberto = self.__total - self.__total_pago
+        return aberto if aberto > 0 else 0.0
+
+    # ===================== MÉTODOS PRINCIPAIS =====================
 
     @classmethod
     def criar_de_carrinho(
@@ -298,10 +323,9 @@ class Pedido:
 
         itens_pedido: List[ItemPedido] = []
         for item_carrinho in carrinho.itens:
-            # Assumindo que ItemCarrinho tenha produto e quantidade
             produto = item_carrinho.produto
             quantidade = item_carrinho.quantidade
-            preco_unitario = produto.preco  # preço travado na data do pedido
+            preco_unitario = produto.preco
 
             itens_pedido.append(
                 ItemPedido(
@@ -320,14 +344,7 @@ class Pedido:
         )
         return pedido
 
-    # calcular_subtotal
-
     def calcular_subtotal(self) -> float:
-        """
-        Soma o subtotal dos itens do pedido.
-        Se ItemPedido tiver atributo 'subtotal', usa ele;
-        senão: preco_unitario * quantidade.
-        """
         subtotal = 0.0
         for item in self.__itens:
             if hasattr(item, "subtotal"):
@@ -340,30 +357,17 @@ class Pedido:
         self.__subtotal = round(subtotal, 2)
         return self.__subtotal
 
-    # aplicar_cupom
-
     def aplicar_cupom(self, cupom: Cupom) -> float:
-        self.cupom = cupom
+        self.__cupom = cupom
+        desconto = cupom.calcular_desconto_para_pedido(self)
+        self.__descontos = round(desconto, 2)
 
-        if hasattr(cupom, "esta_valido") and not cupom.esta_valido(self):
-            self.__descontos = 0.0
-            return self.__descontos
+        self.calcular_total()
 
-        tipo = getattr(cupom, "tipo", "VALOR")
-        valor = float(getattr(cupom, "valor", 0.0))
+        if self.__descontos > 0:
+            cupom.registrar_uso()
 
-        desconto_calculado = 0.0
-        if tipo == "VALOR":
-            desconto_calculado = min(valor, self.__subtotal)
-        elif tipo == "PERCENTUAL":
-            desconto_calculado = self.__subtotal * (valor / 100.0)
-
-        desconto_calculado = min(desconto_calculado, self.__subtotal)
-
-        self.__descontos = round(desconto_calculado, 2)
         return self.__descontos
-
-    # calcular_total
 
     def calcular_total(self) -> float:
         total = self.__subtotal - self.__descontos + self.__valor_frete
@@ -371,8 +375,6 @@ class Pedido:
             total = 0.0
         self.__total = round(total, 2)
         return self.__total
-
-    # aplicar_teste
 
     def aplicar_teste(self) -> bool:
         self.calcular_subtotal()
@@ -382,33 +384,77 @@ class Pedido:
         self.calcular_total()
         return True
 
-    # registrar_pagamento
+    # ===================== PAGAMENTOS: REGISTRO / ESTORNO =====================
 
-    def registrar_pagamento(
+    def registrar_pagamento(self, pagamento: Pagamento) -> None:
+        from pagamento import Pagamento as PagamentoCls
+        if not isinstance(pagamento, PagamentoCls):
+            raise TypeError("Error: pagamento must be a Pagamento object.")
+
+        if getattr(pagamento, "estornado", False):
+            raise ValueError("Error: cannot register a refunded payment.")
+
+        if pagamento in self.__pagamentos:
+            return
+
+        self.__pagamentos.append(pagamento)
+        self.__total_pago += float(pagamento.valor)
+
+        self.__atualizar_status_pos_pagamento(pagamento.data_pagamento)
+
+    def registrar_estorno(self, pagamento: Pagamento) -> None:
+        from pagamento import Pagamento as PagamentoCls
+        if not isinstance(pagamento, PagamentoCls):
+            raise TypeError("Error: pagamento must be a Pagamento object.")
+
+        if pagamento not in self.__pagamentos:
+            return
+
+        self.__total_pago -= float(pagamento.valor)
+        if self.__total_pago < 0:
+            self.__total_pago = 0.0
+
+        self.__atualizar_status_pos_pagamento()
+
+    def __atualizar_status_pos_pagamento(
         self,
-        valor_pago: float,
         data_pagamento: Optional[datetime] = None,
     ) -> None:
-        if not isinstance(valor_pago, (int, float)):
-            raise TypeError("Error: 'valor_pago' must be a number.")
+        if self.__status == self.STATUS_CANCELADO:
+            return
 
-        if valor_pago < self.__total:
-            raise ValueError(
-                "Error: valor_pago must be >= total do pedido."
-            )
+        old_status = self.__status
 
-        #regra de negócio do estoque!
-        self._baixar_estoque()
+        if self.__total_pago <= 0:
+            new_status = self.STATUS_PENDENTE_PAGAMENTO
+            novo_pago_em = None
+        elif self.__total_pago < self.__total:
+            new_status = self.STATUS_PAGO_PARCIAL
+            novo_pago_em = None
+        else:
+            new_status = self.STATUS_PAGO
+            novo_pago_em = data_pagamento or datetime.now()
 
-        self.__pago_em = data_pagamento or datetime.now()
-        self.status = self.STATUS_PAGO
+        if old_status != self.STATUS_PAGO and new_status == self.STATUS_PAGO:
+            self._baixar_estoque()
+        elif old_status == self.STATUS_PAGO and new_status != self.STATUS_PAGO:
+            self._estornar_estoque()
 
-    # cancelar
+        self.status = new_status
+        self.__pago_em = novo_pago_em
+
+    # ===================== CANCELAR / ENVIAR / ENTREGAR =====================
 
     def cancelar(self) -> None:
-        if self.__status not in (self.STATUS_CRIADO, self.STATUS_PAGO):
+        if self.__status not in (
+            self.STATUS_CRIADO,
+            self.STATUS_PENDENTE_PAGAMENTO,
+            self.STATUS_PAGO_PARCIAL,
+            self.STATUS_PAGO,
+        ):
             raise ValueError(
-                "Error: pedido só pode ser cancelado se estiver CRIADO ou PAGO."
+                "Error: pedido só pode ser cancelado se estiver "
+                "CRIADO, PENDENTE_PAGAMENTO, PAGO_PARCIAL ou PAGO."
             )
 
         if self.__status == self.STATUS_PAGO:
@@ -416,8 +462,6 @@ class Pedido:
 
         self.status = self.STATUS_CANCELADO
         self.__cancelado_em = datetime.now()
-
-    # marcar_enviado
 
     def marcar_enviado(self, codigo_rastreio: Optional[str] = None) -> None:
         if self.__status != self.STATUS_PAGO:
@@ -427,8 +471,6 @@ class Pedido:
         self.__enviado_em = datetime.now()
         self.__codigo_rastreio = codigo_rastreio or self._gerar_codigo_rastreio()
 
-    # marcar_entregue
-
     def marcar_entregue(self, data_entrega: Optional[datetime] = None) -> None:
         if self.__status != self.STATUS_ENVIADO:
             raise ValueError("Error: só é possível marcar como entregue se estiver ENVIADO.")
@@ -436,9 +478,9 @@ class Pedido:
         self.status = self.STATUS_ENTREGUE
         self.__entregue_em = data_entrega or datetime.now()
 
-    # gerar_resumo_textual
+    # ===================== RESUMO / STR / REPR =====================
 
-    def gerar_resumo_textual(self):
+    def gerar_resumo_textual(self) -> str:
         linhas = []
         linhas.append(f"Pedido #{self.__id} - Status: {self.__status}")
         linhas.append(f"Cliente: {self.__cliente.nome} (CPF: {self.__cliente.cpf})")
@@ -461,65 +503,51 @@ class Pedido:
         linhas.append(f"Descontos: -R$ {self.__descontos:.2f}")
         linhas.append(f"Frete: R$ {self.__valor_frete:.2f}")
         linhas.append(f"Total: R$ {self.__total:.2f}")
+        linhas.append(f"Total pago: R$ {self.__total_pago:.2f}")
+        linhas.append(f"Valor em aberto: R$ {self.valor_em_aberto:.2f}")
 
         if self.__codigo_rastreio:
             linhas.append(f"Código de rastreio: {self.__codigo_rastreio}")
 
         return "\n".join(linhas)
 
-    # MÉTODOS ESPECIAIS
-
     def __str__(self) -> str:
-        return f"Pedido #{self.__id} - Cliente: {self.__cliente.nome} - Total: R$ {self.__total:.2f}"
+        return (
+            f"Pedido #{self.__id} - Cliente: {self.__cliente.nome} - "
+            f"Total: R$ {self.__total:.2f} - Status: {self.__status}"
+        )
 
     def __repr__(self) -> str:
         return (
             f"Pedido(id={self.__id}, cliente={self.__cliente!r}, "
             f"total={self.__total:.2f}, status='{self.__status}')"
         )
-    
-    # REGRA DE NEGÓCIO - CONTROLE DE ESTOQUE
 
-    def _baixar_estoque(self):
-        # Diminui estoque do produto com base no pedido, não permitindo estoque negativo.
+    # ===================== ESTOQUE =====================
+
+    def _baixar_estoque(self) -> None:
         for item in self.__itens:
             produto = item.produto
             quantidade = item.quantidade
 
-            # validação de atributo estoque:
             estoque_atual = getattr(produto, "estoque", None)
             if estoque_atual is None:
                 raise AttributeError("'Produto' doesn't have 'estoque' attribute.")
-            
+
             if quantidade > estoque_atual:
                 raise ValueError(
                     f"Estoque insuficiente para o produto {produto.nome}: "
-                    f"solicitado {quantidade}, disponível {estoque_atual}."                    
+                    f"solicitado {quantidade}, disponível {estoque_atual}."
                 )
-            
+
         for item in self.__itens:
             produto = item.produto
             produto.estoque = produto.estoque - item.quantidade
 
-    def _estornar_estoque(self):
-        # Reverte a baixa de estoque (usado em cancelamento do pedido pago).
+    def _estornar_estoque(self) -> None:
         for item in self.__itens:
             produto = item.produto
             estoque_atual = getattr(produto, "estoque", None)
             if estoque_atual is None:
                 raise AttributeError("'Produto' doesn't have 'estoque' attribute.")
             produto.estoque = estoque_atual + item.quantidade
-
-"""
-    Métodos planejados:
-    - criar_de_carrinho()
-    - calcular_subtotal()
-    - aplicar_cupom()
-    - calcular_total()
-    - aplicar_teste()
-    - registrar_pagamento()
-    - cancelar()
-    - gerar_resumo_textual()
-    - marcar_enviado()
-    - marcar_entregue()
-"""
