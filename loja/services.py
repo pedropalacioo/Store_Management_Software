@@ -9,14 +9,27 @@ from typing import Dict, Any
 from datetime import datetime
 from collections import Counter
 
-from persistence.db import listar_pedidos
+from loja.persistence.db import (
+    init_db,
+    salvar_produto,
+    listar_produtos,
+    buscar_produto_por_sku,
+    salvar_cliente,
+    listar_clientes,
+    buscar_cliente_por_id,
+    salvar_cupom,
+    buscar_cupom_por_codigo,
+    salvar_pedido,
+    _carregar_itens_pedido,
+    listar_pedidos,
+)
 
-from src.carrinho import Carrinho
-from src.cupom import Cupom
-from src.frete import Frete
-from src.pedido import Pedido
-from src.produto import Produto
-from src.item_pedido import ItemPedido
+from loja.src.carrinho import Carrinho
+from loja.src.cupom import Cupom
+from loja.src.frete import Frete
+from loja.src.pedido import Pedido
+from loja.src.produto import Produto
+from loja.src.item_pedido import ItemPedido
 
 def fechar_pedido(carrinho, cliente, cupom: Cupom | None = None) -> Pedido:
     # 1) Subtotal dos itens

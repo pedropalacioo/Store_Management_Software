@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Optional
-from pedido import Pedido  # ajuste se o nome da file for diferente
+from loja.src.pedido import Pedido  # ajuste se o nome da file for diferente
 
 
 class Pagamento:

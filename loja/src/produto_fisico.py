@@ -1,4 +1,4 @@
-from produto import Produto
+from loja.src.produto import Produto
 
 
 class ProdutoFisico(Produto):

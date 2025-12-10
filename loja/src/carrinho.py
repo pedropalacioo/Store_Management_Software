@@ -1,5 +1,5 @@
 import uuid
-from .item_carrinho import ItemCarrinho
+from loja.src.item_carrinho import ItemCarrinho
 
 class Carrinho:
     def __init__(self, cliente, criado_em=None, atualizado_em=None, ativo=True):

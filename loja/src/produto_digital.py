@@ -1,6 +1,6 @@
 import uuid
 
-from produto import Produto
+from loja.src.produto import Produto
 
 
 class ProdutoDigital(Produto):

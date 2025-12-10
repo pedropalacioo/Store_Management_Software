@@ -5,20 +5,25 @@
 from __future__ import annotations
 
 import sqlite3
+import datetime
 from pathlib import Path
 from typing import List, Optional
-from datetime import datetime
 import json
 
-from src.produto import Produto
-from src.cliente import Cliente
-from src.pedido import Pedido
-from src.item_pedido import ItemPedido
-from src.cupom import Cupom
+from loja.src.produto import Produto
+from loja.src.cliente import Cliente
+from loja.src.pedido import Pedido
+from loja.src.item_pedido import ItemPedido
+from loja.src.cupom import Cupom
 
 # Caminho do arquivo do banco
 DB_PATH = Path(__file__).resolve().parent / "loja.db"
 
+# adaptar datetime.date/datetime para SQLite e reconverter ao ler
+sqlite3.register_adapter(datetime.date, lambda d: d.isoformat())
+sqlite3.register_adapter(datetime.datetime, lambda dt: dt.isoformat(sep=' '))
+sqlite3.register_converter("DATE", lambda b: datetime.date.fromisoformat(b.decode()))
+sqlite3.register_converter("TIMESTAMP", lambda b: datetime.datetime.fromisoformat(b.decode()))
 
 # ========== CONEXÃO ==========
 
@@ -121,13 +126,13 @@ def init_db() -> None:
 
 # HELPERS GERAIS
 
-def _dt_to_str(dt: Optional[datetime]) -> Optional[str]:
+def _dt_to_str(dt: Optional[datetime.datetime]) -> Optional[str]:
     if dt is None:
         return None
     return dt.isoformat(timespec="seconds")
 
 
-def _str_to_dt(s: Optional[str]) -> Optional[datetime]:
+def _str_to_dt(s: Optional[str]) -> Optional[datetime.datetime]:
     if not s:
         return None
     return datetime.fromisoformat(s)

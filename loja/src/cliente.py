@@ -1,5 +1,5 @@
 import uuid
-from .endereco import Endereco
+from loja.src.endereco import Endereco
 
 
 class Cliente:

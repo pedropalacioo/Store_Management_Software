@@ -1,4 +1,4 @@
-from produto import Produto
+from loja.src.produto import Produto
 
 class ItemPedido:
     def __init__(self, sku: str, nome: str, quantidade: int, preco_unitario: float):

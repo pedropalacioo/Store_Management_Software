@@ -4,11 +4,11 @@ import uuid
 from datetime import datetime
 from typing import List, Optional, TYPE_CHECKING
 
-from cliente import Cliente
-from carrinho import Carrinho
-from item_pedido import ItemPedido
-from cupom import Cupom
-from frete import Frete
+from loja.src.cliente import Cliente
+from loja.src.carrinho import Carrinho
+from loja.src.item_pedido import ItemPedido
+from loja.src.cupom import Cupom
+from loja.src.frete import Frete
 
 # Import só para o type checker (não roda em tempo de execução)
 if TYPE_CHECKING:
