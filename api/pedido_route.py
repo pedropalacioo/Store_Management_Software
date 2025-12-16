@@ -10,6 +10,13 @@ from datetime import datetime
 
 from core.pedido import Pedido
 from core.carrinho import Carrinho
+from services.services_database import (
+    validar_cliente_existe, 
+    validar_pedido_endereco_valido,
+    validar_pedido_cupom_valido,
+    validar_estoque_suficiente,
+    ValidacaoDatabaseError
+)
 
 router = APIRouter(
     prefix="/pedidos",
@@ -70,6 +77,9 @@ def criar_pedido_do_carrinho(pedido: PedidoCreateRequest):
     - **endereco_entrega_id**: ID do endereço de entrega
     """
     try:
+        # Validar se cliente existe
+        validar_cliente_existe(pedido.cliente_cpf)
+        
         return {
             "numero": "PED-001",
             "status": "CRIADO",
@@ -81,6 +91,11 @@ def criar_pedido_do_carrinho(pedido: PedidoCreateRequest):
             "total": 0.0,
             "itens": []
         }
+    except ValidacaoDatabaseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

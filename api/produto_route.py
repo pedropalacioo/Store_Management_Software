@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import db.database as database
 from core.produto_digital import ProdutoDigital
 from core.produto_fisico import ProdutoFisico
+from services.services_database import validar_sku_unico, ValidacaoDatabaseError
 
 router = APIRouter(
     prefix = "/produtos",
@@ -81,6 +82,16 @@ class ProdutoResponse(BaseModel):
 @router.post("/fisico", response_model=ProdutoFisicoResponse, status_code=status.HTTP_201_CREATED)
 def criar_produto_fisico(produto: ProdutoFisicoCreate):
     """Cria um novo produto físico"""
+    # Validar SKU único se fornecido
+    if produto.sku:
+        try:
+            validar_sku_unico(produto.sku)
+        except ValidacaoDatabaseError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+    
     novo_produto = ProdutoFisico(
         nome=produto.nome,
         descricao=produto.descricao,
@@ -97,6 +108,16 @@ def criar_produto_fisico(produto: ProdutoFisicoCreate):
 @router.post("/digital", response_model=ProdutoDigitalResponse, status_code=status.HTTP_201_CREATED)
 def criar_produto_digital(produto: ProdutoDigitalCreate):
     """Cria um novo produto digital"""
+    # Validar SKU único se fornecido
+    if produto.sku:
+        try:
+            validar_sku_unico(produto.sku)
+        except ValidacaoDatabaseError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+    
     novo_produto = ProdutoDigital(
         nome=produto.nome,
         descricao=produto.descricao,

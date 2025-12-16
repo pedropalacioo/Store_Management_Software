@@ -12,6 +12,11 @@ from core.produto_digital import ProdutoDigital
 DB_PATH = Path("db/database.db")
 
 
+def get_db_path() -> Path:
+    """Retorna o caminho do banco de dados."""
+    return DB_PATH
+
+
 #--------------------------------------------------------------
 # TABELA DE CLIENTES
 #--------------------------------------------------------------
@@ -164,6 +169,8 @@ try:
             descricao TEXT NOT NULL,
             preco REAL NOT NULL,
             tipo TEXT NOT NULL,
+            sku TEXT,
+            estoque INTEGER DEFAULT 0,
             peso REAL,
             altura REAL,
             largura REAL,
@@ -175,6 +182,18 @@ try:
         cursor.execute(create_table_query)
         conn.commit()
         print("Tabela 'produtos' criada com sucesso (ou já existia).")
+        
+        # Migração: adicionar colunas SKU e ESTOQUE se não existirem
+        cursor.execute("PRAGMA table_info(produtos);")
+        cols = [row[1] for row in cursor.fetchall()]
+        if 'sku' not in cols:
+            cursor.execute("ALTER TABLE produtos ADD COLUMN sku TEXT;")
+            conn.commit()
+            print("Coluna 'sku' adicionada à tabela 'produtos'.")
+        if 'estoque' not in cols:
+            cursor.execute("ALTER TABLE produtos ADD COLUMN estoque INTEGER DEFAULT 0;")
+            conn.commit()
+            print("Coluna 'estoque' adicionada à tabela 'produtos'.")
 
 except sqlite3.Error as e:
     print(f"Erro no SQLite: {e}")
@@ -380,3 +399,56 @@ def deletar_produto_por_sku(sku: str) -> None:
         conn.commit()
 
     print(f"Produto SKU {sku} deletado com sucesso.")
+
+
+# Helper functions para testes
+def salvar_cupom(cupom) -> int:
+    """Salva um cupom no banco (função helper para testes)."""
+    from core.cupom import Cupom
+    
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        
+        # Criar tabela de cupons se não existir
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS cupons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                codigo TEXT NOT NULL UNIQUE,
+                percentual_desconto REAL NOT NULL,
+                valor_minimo_compra REAL NOT NULL,
+                ativo BOOLEAN NOT NULL DEFAULT 1
+            )
+        """)
+        
+        cursor.execute(
+            "INSERT INTO cupons (codigo, percentual_desconto, valor_minimo_compra, ativo) VALUES (?, ?, ?, ?)",
+            (cupom.codigo, cupom.percentual_desconto, cupom.valor_minimo_compra, cupom.ativo)
+        )
+        conn.commit()
+        return cursor.lastrowid
+
+
+def salvar_endereco(endereco) -> int:
+    """Salva um endereço no banco (função helper para testes)."""
+    from core.endereco import Endereco
+    
+    with sqlite3.connect(DB_PATH) as conn:
+        cursor = conn.cursor()
+        
+        # Criar tabela de endereços se não existir
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS enderecos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cep TEXT NOT NULL,
+                numero INTEGER NOT NULL,
+                cidade TEXT NOT NULL,
+                uf TEXT NOT NULL
+            )
+        """)
+        
+        cursor.execute(
+            "INSERT INTO enderecos (cep, numero, cidade, uf) VALUES (?, ?, ?, ?)",
+            (endereco.cep, endereco.numero, endereco.cidade, endereco.uf)
+        )
+        conn.commit()
+        return cursor.lastrowid

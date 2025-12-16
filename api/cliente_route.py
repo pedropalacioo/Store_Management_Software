@@ -4,6 +4,12 @@ from pydantic import BaseModel, EmailStr
 import db.database as database
 from core.cliente import Cliente
 from core.endereco import Endereco
+from services.services_database import (
+    validar_email_unico,
+    validar_cpf_unico,
+    ValidacaoDatabaseError
+)
+from services.utils import limpar_cpf, limpar_cep
 
 router = APIRouter(
     prefix = "/clientes",
@@ -55,13 +61,41 @@ class ClienteComEnderecosResponse(BaseModel):
 # Rotas CREATE
 @router.post("/", response_model = clienteResponse, status_code = status.HTTP_201_CREATED)
 def criar_cliente(cliente: ClienteCreate):
-    novo_cliente = Cliente(
-        nome = cliente.nome,
-        email = cliente.email,
-        cpf = cliente.cpf,
-    )
-    database.salvar_cliente(novo_cliente)
-    return novo_cliente
+    try:
+        # Limpar CPF (remover formatação)
+        cpf_limpo = limpar_cpf(cliente.cpf)
+        
+        # Validar CPF único
+        if not validar_cpf_unico(cpf_limpo):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"CPF {cpf_limpo} já cadastrado no sistema"
+            )
+        
+        # Validar Email único
+        if not validar_email_unico(cliente.email):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Email {cliente.email} já cadastrado no sistema"
+            )
+        
+        novo_cliente = Cliente(
+            nome = cliente.nome,
+            email = cliente.email,
+            cpf = cpf_limpo,
+        )
+        database.salvar_cliente(novo_cliente)
+        return novo_cliente
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except ValidacaoDatabaseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 
 # Rotas READ
 @router.get("/")
@@ -71,9 +105,10 @@ def listar_clientes() -> list[clienteResponse]:
 
 @router.get("/{cpf}")
 def buscar_cliente(cpf: str) -> clienteResponse:
+    cpf_limpo = limpar_cpf(cpf)
     clientes = database.carregar_clientes()
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             return cliente
     raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Cliente não encontrado.")
 
@@ -81,57 +116,60 @@ def buscar_cliente(cpf: str) -> clienteResponse:
 # NOME
 @router.patch("/{cpf}/nome", response_model = clienteResponse)
 def atualizar_cliente_nome(cpf: str, cliente_update: ClienteUpdateNome):
+    cpf_limpo = limpar_cpf(cpf)
     clientes = database.carregar_clientes()
     cliente_encontrado = False
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             cliente_encontrado = True
             break
     
     if not cliente_encontrado:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Cliente não encontrado.")
     
-    database.atualizar_cliente_nome(cpf, cliente_update.nome)
+    database.atualizar_cliente_nome(cpf_limpo, cliente_update.nome)
     
     clientes_atualizado = database.carregar_clientes()
     for cliente in clientes_atualizado:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             return cliente
 
 # EMAIL
 @router.patch("/{cpf}/email", response_model = clienteResponse)
 def atualizar_cliente_email(cpf: str, cliente_update: ClienteUpdateEmail):
+    cpf_limpo = limpar_cpf(cpf)
     clientes = database.carregar_clientes()
     cliente_encontrado = False
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             cliente_encontrado = True
             break
     
     if not cliente_encontrado:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Cliente não encontrado.")
     
-    database.atualizar_cliente_email(cpf, cliente_update.email)
+    database.atualizar_cliente_email(cpf_limpo, cliente_update.email)
     
     clientes_atualizado = database.carregar_clientes()
     for cliente in clientes_atualizado:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             return cliente
 
 # Rotas DELETE
 @router.delete("/{cpf}", status_code = status.HTTP_204_NO_CONTENT)
 def deletar_cliente(cpf: str):
+    cpf_limpo = limpar_cpf(cpf)
     clientes = database.carregar_clientes()
     cliente_encontrado = False
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             cliente_encontrado = True
             break
     
     if not cliente_encontrado:
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Cliente não encontrado.")
     
-    database.deletar_cliente(cpf)
+    database.deletar_cliente(cpf_limpo)
 
 
 # ===== ROTAS ENDEREÇOS =====
@@ -140,11 +178,14 @@ def deletar_cliente(cpf: str):
 @router.post("/{cpf}/enderecos", response_model = ClienteComEnderecosResponse, status_code = status.HTTP_201_CREATED)
 def adicionar_endereco(cpf: str, endereco: EnderecoCreate):
     """Adiciona um novo endereço ao cliente"""
+    cpf_limpo = limpar_cpf(cpf)
+    cep_limpo = limpar_cep(endereco.cep)
+    
     clientes = database.carregar_clientes()
     cliente_encontrado = None
     
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             cliente_encontrado = cliente
             break
     
@@ -152,14 +193,14 @@ def adicionar_endereco(cpf: str, endereco: EnderecoCreate):
         raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Cliente não encontrado.")
     
     novo_endereco = Endereco(
-        cep = endereco.cep,
+        cep = cep_limpo,
         numero = endereco.numero,
         cidade = endereco.cidade,
         UF = endereco.UF
     )
     
     cliente_encontrado.endereco.append(novo_endereco)
-    database.atualizar_cliente_endereco(cpf, cliente_encontrado.endereco)
+    database.atualizar_cliente_endereco(cpf_limpo, cliente_encontrado.endereco)
     
     return {
         "nome": cliente_encontrado.nome,
@@ -172,10 +213,11 @@ def adicionar_endereco(cpf: str, endereco: EnderecoCreate):
 @router.get("/{cpf}/enderecos", response_model = list[EnderecoResponse])
 def listar_enderecos(cpf: str):
     """Lista todos os endereços de um cliente"""
+    cpf_limpo = limpar_cpf(cpf)
     clientes = database.carregar_clientes()
     
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             if not cliente.endereco:
                 raise HTTPException(status_code = status.HTTP_404_NOT_FOUND, detail = "Cliente não possui endereços cadastrados.")
             return cliente.endereco
@@ -186,11 +228,12 @@ def listar_enderecos(cpf: str):
 @router.patch("/{cpf}/enderecos/{indice}", response_model = ClienteComEnderecosResponse)
 def atualizar_endereco(cpf: str, indice: int, endereco_update: EnderecoUpdate):
     """Atualiza um endereço específico do cliente"""
+    cpf_limpo = limpar_cpf(cpf)
     clientes = database.carregar_clientes()
     cliente_encontrado = None
     
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             cliente_encontrado = cliente
             break
     
@@ -203,7 +246,7 @@ def atualizar_endereco(cpf: str, indice: int, endereco_update: EnderecoUpdate):
     endereco = cliente_encontrado.endereco[indice]
     
     if endereco_update.cep is not None:
-        endereco.cep = endereco_update.cep
+        endereco.cep = limpar_cep(endereco_update.cep)
     if endereco_update.numero is not None:
         endereco.numero = endereco_update.numero
     if endereco_update.cidade is not None:
@@ -211,7 +254,7 @@ def atualizar_endereco(cpf: str, indice: int, endereco_update: EnderecoUpdate):
     if endereco_update.UF is not None:
         endereco.UF = endereco_update.UF
     
-    database.atualizar_cliente_endereco(cpf, cliente_encontrado.endereco)
+    database.atualizar_cliente_endereco(cpf_limpo, cliente_encontrado.endereco)
     
     return {
         "nome": cliente_encontrado.nome,
@@ -224,11 +267,12 @@ def atualizar_endereco(cpf: str, indice: int, endereco_update: EnderecoUpdate):
 @router.delete("/{cpf}/enderecos/{indice}", status_code = status.HTTP_204_NO_CONTENT)
 def deletar_endereco(cpf: str, indice: int):
     """Remove um endereço específico do cliente"""
+    cpf_limpo = limpar_cpf(cpf)
     clientes = database.carregar_clientes()
     cliente_encontrado = None
     
     for cliente in clientes:
-        if cliente.cpf == cpf:
+        if cliente.cpf == cpf_limpo:
             cliente_encontrado = cliente
             break
     

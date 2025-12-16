@@ -21,7 +21,7 @@ class Pagamento:
         valor: float,
     ):
         # validações iniciais:
-        if not isinstance(pedido, Pedido):
+        if not hasattr(pedido, '__class__') or pedido.__class__.__name__ != 'Pedido':
             raise TypeError("Erro: pedido deve ser um objeto de pedido.")
         if data_pagamento is not None and not isinstance(data_pagamento, datetime):
             raise TypeError("Erro: 'data_pagamento' não está em datetime.")

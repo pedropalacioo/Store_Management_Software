@@ -12,6 +12,12 @@ from core.carrinho import Carrinho
 from core.item_carrinho import ItemCarrinho
 from core.produto import Produto
 from db.database import carregar_clientes
+from services.services_database import (
+    validar_limite_itens_carrinho,
+    validar_estoque_suficiente,
+    ValidacaoDatabaseError
+)
+from services.utils import limpar_cpf
 
 router = APIRouter(
     prefix="/carrinhos",
@@ -40,19 +46,21 @@ def criar_carrinho(cliente_cpf: str = Query(..., description="CPF do cliente")):
     - **cliente_cpf**: CPF do cliente
     """
     try:
+        cpf_limpo = limpar_cpf(cliente_cpf)
+        
         # Buscar cliente no banco
         clientes = carregar_clientes()
         cliente = None
         
         for c in clientes:
-            if c.cpf == cliente_cpf:
+            if c.cpf == cpf_limpo:
                 cliente = c
                 break
         
         if not cliente:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Cliente com CPF {cliente_cpf} não encontrado"
+                detail=f"Cliente com CPF {cpf_limpo} não encontrado"
             )
         
         carrinho = Carrinho(
@@ -69,6 +77,11 @@ def criar_carrinho(cliente_cpf: str = Query(..., description="CPF do cliente")):
             "subtotal": carrinho.subtotal(),
             "itens": []
         }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -87,10 +100,21 @@ def adicionar_item_carrinho(cliente_cpf: str, item: ItemCarrinhoRequest):
     - **item**: Dados do item (sku do produto e quantidade)
     """
     try:
+        # Validar limite de itens no carrinho (máximo 50 itens)
+        validar_limite_itens_carrinho(quantidade_atual=0, novo_item_quantidade=item.quantidade)
+        
+        # Validar se há estoque suficiente do produto
+        validar_estoque_suficiente(item.produto_sku, item.quantidade)
+        
         return {
             "message": "Item adicionado com sucesso",
             "item": item.dict()
         }
+    except ValidacaoDatabaseError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

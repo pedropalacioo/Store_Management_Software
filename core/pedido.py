@@ -101,10 +101,6 @@ class Pedido:
 
         # Calcula valores iniciais
         self.calcular_subtotal()
-        if self.__cupom:
-            self.aplicar_cupom(self.__cupom)
-        self._atualizar_valor_frete()
-        self.calcular_total()
 
         self.cliente = cliente
         self.itens = itens

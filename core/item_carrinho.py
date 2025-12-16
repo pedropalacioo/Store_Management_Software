@@ -20,8 +20,7 @@ class ItemCarrinho:
     # PRODUTO: GETTER E SETTER
     @property
     def produto(self) -> Produto:
-        __produto = self.produto.nome
-        return __produto
+        return self.__produto
     
     @produto.setter
     def produto(self, novo_produto: Produto) -> None:
@@ -45,8 +44,7 @@ class ItemCarrinho:
     # PREÇO UNITÁRIO: GETTER E SETTER
     @property
     def preco_unitario(self) -> float:
-        __preco_unitario = self.produto.preco
-        return __preco_unitario
+        return self.__preco_unitario
     
     @preco_unitario.setter
     def preco_unitario(self, novo_preco: float) -> None:

@@ -20,10 +20,10 @@ def carregar_settings() -> Dict[str, Any]:
 
 @dataclass
 class Frete:
-    uf = str
-    cep = str
-    valor = float
-    prazo_entrega = int
+    uf: str
+    cep: str
+    valor: float
+    prazo_entrega: int
 
     @classmethod
     def from_frete(cls, uf: str) -> Frete:
@@ -53,8 +53,8 @@ class Frete:
             prazo_entrega = int(configuracao_padrao.get("prazo", 0))
         
         return cls(
-            uf_origem = uf_origem,
             uf=uf,
+            cep="",
             valor=valor_entrega,
             prazo_entrega=prazo_entrega,
         )
